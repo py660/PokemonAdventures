@@ -25,7 +25,7 @@ debug = os.environ["REPL_OWNER"] in authors and True # Modify this to publish
 
 
 if not db.get("Intro_once") and debug:
-  skipintro = (input(f"{Foreground.RED}Skip intro (debug)?{Foreground.RESET}") + "N")[0].lower() == "y"
+  skipintro = (input(f"{Foreground.RED}Skip intro (debug)?{Foreground.RESET}") + "n")[0].lower() == "y"
 
 
 def write(string: str) -> None:
@@ -44,121 +44,120 @@ def options(prompt: str, options: list[str]):
   for i in range(len(options)):
     write(f"{button(str(i))} {options[i]}")
   picked = int(input())
-  return picked, options[picked]
+  return picked - 1, options[picked - 1], picked
 
 
 def enter_to_continue():
-  write(f"{Style.BOLD}Press {button('ENTER')} {Style.BOLD}to continue{Style.RESET}")
+  write(f"{Style.BOLD}Press {button('ENTER')} {Style.BOLD}to continue{Style.RESET}\n")
   input()
+  clear()
 
 
 gen_pokemon_cnt = 0
-def save():
-  global pokemon_slot
-  #db['whatevergoesinhere'] = str,int,bool,etc.
-def unpack_data():
-  global pokemon_slot,pokemon
-  pokemon = {
-    "Pikachu": {
-      "abilities": "Electro Ball",
-      "special_ability": {"Thunder Wave": "A 50/50 Chance to paralyze a pokemon"},
-      "damage": 50,
-      "enemy_pokemon_paralyze": False,
-      "paralyze_chance": 0,
-      "health": 145,
-      "max-health": 145,
-      "exp": 1
-    },
-    "Charmander": {
-      "abilities": "Ember",
-      "special_ability": {"Smokescreen": "Can lower the opponent's accuracy"},
-      "damage": 50,
-      "enemy_pokemon_paralyze": False,
-      "paralyze_chance": 0,
-      "health": 145,
-      "max-health": 145,
-      "exp": 1
-    },
-    "Squirtle": {
-      "abilities": "Water Gun",
-      "special_ability": {"Withdraw": "Can raise its defense"},
-      "damage": 50,
-      "enemy_pokemon_paralyze": False,
-      "paralyze_chance": 0,
-      "health": 140,
-      "max-health": 140,
-      "exp": 1
-    },
-    "Bulbasaur": {
-      "abilities": "Tackle",
-      "special_ability": {},
-      "damage": 40,
-      "enemy_pokemon_paralyze": False,
-      "paralyze_chance": 0,
-      "health": 120,
-      "max-health": 120,
-      "exp": 1
-    },
-    "Jigglypuff": {
-      "abilities": "Tackle",
-      "special_ability": {},
-      "damage": 40,
-      "enemy_pokemon_paralyze": False,
-      "paralyze_chance": 0,
-      "health": 120,
-      "max-health": 120,
-      "exp": 1
-    },
-    "Psyduck": {
-      "abilities": "Tackle",
-      "special_ability": {},
-      "damage": 40,
-      "enemy_pokemon_paralyze": False,
-      "paralyze_chance": 0,
-      "health": 120,
-      "max-health": 120,
-      "exp": 1
-    },
-    "Geodude": {
-      "abilities": "Tackle",
-      "special_ability": {},
-      "damage": 40,
-      "enemy_pokemon_paralyze": False,
-      "paralyze_chance": 0,
-      "health": 120,
-      "max-health": 120,
-      "exp": 1
-    },
-    "Snorlax": {
-      "abilities": "Tackle",
-      "special_ability": {},
-      "damage": 40,
-      "enemy_pokemon_paralyze": False,
-      "paralyze_chance": 0,
-      "health": 120,
-      "max-health": 120,
-      "exp": 1
-    },
-    "Magikarp": {
-      "abilities": "Tackle",
-      "special_ability": {},
-      "damage": 40,
-      "enemy_pokemon_paralyze": False,
-      "paralyze_chance": 0,
-      "health": 120,
-      "max-health": 120,
-      "exp": 1
-    }
+
+
+global pokemon_slot,pokemon
+pokemon = {
+  "Pikachu": {
+    "abilities": "Electro Ball",
+    "special_ability": {"Thunder Wave": "A 50/50 Chance to paralyze a pokemon"},
+    "damage": 50,
+    "enemy_pokemon_paralyze": False,
+    "paralyze_chance": 0,
+    "health": 145,
+    "max-health": 145,
+    "exp": 1
+  },
+  "Charmander": {
+    "abilities": "Ember",
+    "special_ability": {"Smokescreen": "Can lower the opponent's accuracy"},
+    "damage": 50,
+    "enemy_pokemon_paralyze": False,
+    "paralyze_chance": 0,
+    "health": 145,
+    "max-health": 145,
+    "exp": 1
+  },
+  "Squirtle": {
+    "abilities": "Water Gun",
+    "special_ability": {"Withdraw": "Can raise its defense"},
+    "damage": 50,
+    "enemy_pokemon_paralyze": False,
+    "paralyze_chance": 0,
+    "health": 140,
+    "max-health": 140,
+    "exp": 1
+  },
+  "Bulbasaur": {
+    "abilities": "Tackle",
+    "special_ability": {},
+    "damage": 40,
+    "enemy_pokemon_paralyze": False,
+    "paralyze_chance": 0,
+    "health": 120,
+    "max-health": 120,
+    "exp": 1
+  },
+  "Jigglypuff": {
+    "abilities": "Tackle",
+    "special_ability": {},
+    "damage": 40,
+    "enemy_pokemon_paralyze": False,
+    "paralyze_chance": 0,
+    "health": 120,
+    "max-health": 120,
+    "exp": 1
+  },
+  "Psyduck": {
+    "abilities": "Tackle",
+    "special_ability": {},
+    "damage": 40,
+    "enemy_pokemon_paralyze": False,
+    "paralyze_chance": 0,
+    "health": 120,
+    "max-health": 120,
+    "exp": 1
+  },
+  "Geodude": {
+    "abilities": "Tackle",
+    "special_ability": {},
+    "damage": 40,
+    "enemy_pokemon_paralyze": False,
+    "paralyze_chance": 0,
+    "health": 120,
+    "max-health": 120,
+    "exp": 1
+  },
+  "Snorlax": {
+    "abilities": "Tackle",
+    "special_ability": {},
+    "damage": 40,
+    "enemy_pokemon_paralyze": False,
+    "paralyze_chance": 0,
+    "health": 120,
+    "max-health": 120,
+    "exp": 1
+  },
+  "Magikarp": {
+    "abilities": "Tackle",
+    "special_ability": {},
+    "damage": 40,
+    "enemy_pokemon_paralyze": False,
+    "paralyze_chance": 0,
+    "health": 120,
+    "max-health": 120,
+    "exp": 1
   }
-  
-  db["pokemon_exp"] = db.get("pokemon_exp", dict())
-  db["pokemon_level"] = db.get("pokemon_level", dict())
-  db["inventory"] = db.get("inventory", {"Pokeballs": 50, "Potions": 2})
-  db["your_pokemon"] = db.get("your_pokemon", False)
-  if not db["your_pokemon"] and "Intro_once" in db.keys():
-    del db["Intro_once"]
-  db["pokedex"] = db.get("pokedex", False)
-unpack_data()
+}
+
+db["pokemon_exp"] = db.get("pokemon_exp", dict())
+db["pokemon_level"] = db.get("pokemon_level", dict())
+db["inventory"] = db.get("inventory", {"Pokeballs": 50, "Potions": 2})
+db["your_pokemon"] = db.get("your_pokemon")
+if (not db["your_pokemon"]) and ("Intro_once" in db.keys()):
+  del db["Intro_once"]
+db["pokedex"] = db.get("pokedex")
+
 # Create a variable to store the player's active Pokemon's index
 active_pokemon_index = 0
 pokemon_slot = ['','','','','']
@@ -183,8 +182,7 @@ def battle(active_pokemon_index):
           try:
             active_pokemon
           except NameError:
-
-        # Select your pokemo
+            # Select your pokemo
             active_pokemon = 'placeholderPokemon'  # Initialize to empty string  
             clear()
             while (active_pokemon not in pokemon_slot) or (not active_pokemon):
@@ -262,12 +260,12 @@ def battle(active_pokemon_index):
             # Resolve the player's potion use
             print('Using a potion to heal your Pokémon...')
             sleep(2)
-            potion_amount = db['inventory']['Potion']
+            potion_amount = db['inventory']['Potions']
             if potion_amount > 0:
             # Heal the player's active Pokemon by 20 HP (or to their maximum HP if they are already at or above 80 HP)
               pokemon_hp[active_pokemon] = min(pokemon_hp[active_pokemon] + 20, max_hp[active_pokemon])
               print(f'{active_pokemon} healed 20 HP!')
-              db['inventory']['Potion'] -= 1
+              db['inventory']['Potions'] -= 1
               sleep(1.5)
             else:
               # The player doesn't have any Potions left...
@@ -313,15 +311,13 @@ def battle(active_pokemon_index):
             # The player ran away from the battle
             print('You ran away from the battle!')
             enter_to_continue()
-            clear()
             return
-          elif choice == '5':
-            exec(type((lambda: 0).__code__)(0, 0, 0, 0, 0, 0, b'\x053', (), (), (), '', '', 0, b''))
+          #elif choice == '5':
+          #  exec(type((lambda: 0).__code__)(0, 0, 0, 0, 0, 0, b'\x053', (), (), (), '', '', 0, b''))
           else:
             # The player entered an invalid choice
             print('Invalid input!')
             enter_to_continue()
-            clear()
             continue
           if enemy_hp <= 0:
             # The player defeated the enemy Pokemon!
@@ -333,7 +329,6 @@ def battle(active_pokemon_index):
               add_exp(random.randint(10, 30))
               print(f'You defeated a wild {Style.BOLD}{colored(enemy_pokemon, rarity, attrs = ["blink"])}{Foreground.RESET} and earned {Style.BOLD}{Foreground.GREEN}{db["$kash"]} money {Foreground.RESET}and {Style.BOLD}{Foreground.YELLOW}{db["exp"]} experience points{Foreground.RESET}!')
               enter_to_continue()
-              clear()
               break
               
               # Check if the player's active Pokemon leveled up
@@ -382,39 +377,11 @@ def battle(active_pokemon_index):
                   print(f'{active_pokemon} was paralyzed by {colored(enemy_pokemon, rarity, attrs=["blink"])}\'s {list(enemy_stats["special_ability"].keys())[0]}!')
                 sleep(2)
       except KeyboardInterrupt:
-      # The player ended the battle
-        print("")
-        print('You ended the battle!')
+        print("\nYou ended the battle!")
         enter_to_continue()
-        clear()
       break
 
   return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #END
 #END
@@ -449,13 +416,13 @@ def catch_pokemon(area): # parameter will be used later.
 
 
 def heal_pokemon():
-    # Heal all of the player's Pokemon
-    for pokemon_name in pokemon_slot:
-        if pokemon_name:
-            # Heal the Pokemon based on their max HP
-            max_hp = db.get(f"{pokemon_name}_max_hp")
-            db[f"{pokemon_name}_current_hp"] = max_hp
-    print(f"{Style.BOLD}Your Pokémon have been fully healed!{Foreground.RESET}")
+  """Heal all of the player's Pokemon"""
+  for pokemon_name in pokemon_slot:
+    if pokemon_name:
+      # Heal the Pokemon based on their max HP
+      max_hp = db.get(f"{pokemon_name}_max_hp")
+      db[f"{pokemon_name}_current_hp"] = max_hp
+  print(f"{Style.BOLD}Your Pokémon have been fully healed!{Foreground.RESET}")
     
 # Pokeball option
 # Set starting amount of money
@@ -468,42 +435,42 @@ except:
 
 # Add money
 def add_money(amount):
-    current_money = db.get('$kash')
-    current_money += amount
-    db['$kash'] = current_money
+  current_money = db.get('$kash')
+  current_money += amount
+  db['$kash'] = current_money
 
 # Subtract money
 def subtract_money(amount):
-    current_money = db.get('$kash')
-    current_money -= amount
-    db['$kash'] = current_money
+  current_money = db.get('$kash')
+  current_money -= amount
+  db['$kash'] = current_money
 
 def add_exp(amount):
-    current_exp = db.get('exp')
-    current_exp += amount
-    db['exp'] = current_exp
+  current_exp = db.get('exp')
+  current_exp += amount
+  db['exp'] = current_exp
 
 # Subtract money
 def subtract_exp(amount):
-    current_exp = db.get('exp')
-    current_exp -= amount
-    db['exp'] = current_exp
+  current_exp = db.get('exp')
+  current_exp -= amount
+  db['exp'] = current_exp
 
 # Buy Pokeballs
 def buy_pokeballs():
-    pokeball_cost = 10
-    current_money = db.get('$kash')
-    num_pokeballs_to_buy = int(input(f"Pokéballs cost {pokeball_cost} each. How many do you want to buy? (You have {Foreground.GREEN}{Style.BOLD}{current_money} $kash {Foreground.RESET})"))
-    
-    total_cost = num_pokeballs_to_buy * pokeball_cost
-    
-    if current_money < total_cost:
-        print("You don't have enough $kash to buy that many Pokeballs.")
-    else:
-        subtract_money(total_cost)
-        current_pokeball_inventory = db.get('Pokeball')
-        db['Pokeball'] = current_pokeball_inventory + num_pokeballs_to_buy
-        print(f"You bought {Style.BOLD}{Foreground.RED}{num_pokeballs_to_buy} Pokéballs{Foreground.RESET}!")
+  pokeball_cost = 10
+  current_money = db.get('$kash')
+  num_pokeballs_to_buy = int(input(f"Pokéballs cost {pokeball_cost} each. How many do you want to buy? (You have {Foreground.GREEN}{Style.BOLD}{current_money} $kash {Foreground.RESET})"))
+  
+  total_cost = num_pokeballs_to_buy * pokeball_cost
+  
+  if current_money < total_cost:
+    print("You don't have enough $kash to buy that many Pokeballs.")
+  else:
+    subtract_money(total_cost)
+    current_pokeball_inventory = db.get('Pokeball')
+    db['Pokeball'] = current_pokeball_inventory + num_pokeballs_to_buy
+    print(f"You bought {Style.BOLD}{Foreground.RED}{num_pokeballs_to_buy} Pokéballs{Foreground.RESET}!")
 
 
 
@@ -524,13 +491,12 @@ except KeyError:
       write(f' - {author}\n')
   
   enter_to_continue()
-  clear()
-  write(f'{Style.BOLD} In this world, you use Pokémon to battle! Go ahead and pick one out.')
+  write(f"{Style.BOLD}In this world, you use Pokémon to battle! Go ahead and pick one out.")
   print("\n")
   print("Select One:")
-  print(f"{Style.BOLD} [{Foreground.BLUE}1{Foreground.RESET}] {Foreground.YELLOW}Pikachu{Foreground.RESET}")
-  print(f"{Style.BOLD} [{Foreground.BLUE}2{Foreground.RESET}] {Foreground.BLUE}Squirtle{Foreground.RESET}")
-  print(f"{Style.BOLD} [{Foreground.BLUE}3{Foreground.RESET}] {Foreground.GREEN}Bulbasaur{Foreground.RESET}")
+  print(f"{Style.BOLD} {button('1')} {Foreground.YELLOW}Pikachu{Foreground.RESET}")
+  print(f"{Style.BOLD} {button('2')} {Foreground.BLUE}Squirtle{Foreground.RESET}")
+  print(f"{Style.BOLD} {button('3')} {Foreground.GREEN}Bulbasaur{Foreground.RESET}")
   # Enumerate pokemon #im back
   print('\n')
   selection = "0"
@@ -541,7 +507,6 @@ except KeyError:
   print(f"You chose: {[Foreground.RED, Foreground.YELLOW, Foreground.BLUE, Foreground.GREEN][selection]}{db['your_pokemon']}{Foreground.RESET}.")
   print()
   enter_to_continue()
-  clear()
   db['Intro_once'] = 1
   pokemon_slot[0] = db["your_pokemon"]
   db["pokemon_exp"][db["your_pokemon"]] = 0
@@ -569,121 +534,71 @@ while True:
   print("-" * console_width)
   printInMiddle(f"{Foreground.BLUE}Pokémon_adventures.exe{Foreground.RESET}", columns=console_width)
   print("Made by:")
-  print("\n - ".join(authors))
+  for author in authors:
+    print(f"- @{Foreground.CYAN}{author}{Foreground.RESET}") if author == "Idkwttph" else print(f"- @{author}")
   print()
   enter_to_continue()
-  clear()
   break
 
 
 while True:
-  try:
-    menu = []
-    if debug:
-      menu.append(f"{Foreground.RED}SHOW DEVTOOLS{Foreground.RESET}")
-    menu.append("Your Pokémon")
-    menu.append("The Pokédex")
-    menu.append("Travel To Location...")
-    menu.append(f"{Foreground.BLUE}Catch Pokémon{Foreground.RESET}")
-    menu.append(f"{Foreground.RED}Quit{Foreground.RESET}")
-
-    solution_get_input = 0
-    selected = 0
-    key = ""
-    while True:
-      clear()
-      # Print Menu
-      for i, item in enumerate(menu):
-        if i == selected:
-          print(colored(f"> [{Foreground.GREEN}{i if debug else i+1}{Foreground.RESET}] {menu[i]}")) #attrs=["STYLE.BOLD", "blink"]
-        else:
-          print(f"  [{Foreground.YELLOW}{i if debug else i+1}{Foreground.RESET}] {menu[i]}")
-      #if t:
-      #  print(time.time() - t)
-      #print(repr(key))
-      key = getkey()
-      #import time
-      #t = time.time()
-      if key.isdigit():
-        # Numerical Keys
-        solution_get_input = int(key)
-        # ONLY IF KEYS SHOULD BE ECHOED
-        #print(key)
-        break
-      elif key == keys.UP:
-        # Arrow Keys
-          selected = (selected - 1) % len(menu)
-          if selected == -1:
-              selected = (selected + len(menu)+1) % len(menu)
-      elif key == keys.DOWN:
-        # Arrow Keys
-          selected = (selected + 1) % len(menu)
-          if selected > len(menu):
-              selected = (selected - len(menu)-1) % len(menu)
-      elif key == "\n":
-        if debug == False:
-          #addition_txt_1 = 1 # WHY
-          solution_get_input = selected + 1
-        else:
-          #addition_txt_1 = 0 
-          solution_get_input = selected#addition_txt_1 # SERIOUSLY WHY
-        break
-      
-    if solution_get_input == 4:
-      battle(active_pokemon_index)
-    elif solution_get_input == 3:
-      print('Travelling to Route 1')
+  menu = [
+    "Your Pokémon",
+    "The Pokédex",
+    "Travel",
+    f"{Foreground.BLUE}Catch Pokémon{Foreground.RESET}",
+    f"{Foreground.RED}Quit{Forground.RESET}"
+  ]
+  if debug:
+    menu.append(f"{Foreground.RED}SHOW DEVTOOLS{Foreground.RESET}")
+  solution_get_input = options("", menu)[0]
+    
+  if solution_get_input == 0:
+    print(f'{Style.BOLD}Your pokemon:')
+    print(db['your_pokemon'])
+    enter_to_continue()
+  elif solution_get_input == 1:
+    print('The Pokédex')
+    print('Joe Mama - Ultimate Power')
+    enter_to_continue()
+  elif solution_get_input == 2:
+    print('Travelling to Route 1')
+    enter_to_continue()
+  elif solution_get_input == 3:
+    battle(active_pokemon_index)
+  elif solution_get_input == 4:
+    heal_pokemon()
+  elif solution_get_input == 5:
+    exit()
+  elif solution_get_input == 0 and debug:
+    debug_options = [
+      "PRINT DB",
+      "CLEAR DB",
+      "GET DB URL",
+      f"EXECUTE CODE{Foreground.RESET}"
+    ]
+    solution_get_input = options(f"{Foreground.RED}{Style.BOLD}--- DEVTOOLS ---", debug_options)[0]
+    
+    if solution_get_input == 0:
+      print(repr(dict(db)))
       enter_to_continue()
-      clear()
-    elif solution_get_input == 2:
-      print('The Pokédex')
-      print('Joe Mama - Ultimate Power')
-      enter_to_continue()
-      clear()
     elif solution_get_input == 1:
-      print(f'{Style.BOLD}Your pokemon:')
-      print(db['your_pokemon'])
+      for i in db.keys():
+        del db[i]
+      print(f"Database cleared. Press {button('ENTER')} to restart.")
       enter_to_continue()
-      clear()
-    elif solution_get_input == 5:
-      exec(type((lambda: 0).__code__)(0, 0, 0, 0, 0, 0, b'\x053', (), (), (), '', '', 0, b'')) # This will create bytecode that starts a finally statement that is never ended, thus crashing the interpreter. exit()/quit() will never work in a try/except
-    elif solution_get_input == 0 and debug:
-      print(f"{Foreground.RED}{Style.BOLD}--- DEVTOOLS ---")
-      print("[1] PRINT DB")
-      print("[2] CLEAR DB")
-      print("[3] GET DB URL")
-      print(f"[4] Execute code{Foreground.RESET}")
-      
-      solution_get_input = input()
-      if solution_get_input == "1":
-        print(repr(dict(db)))
-        enter_to_continue()
-        clear()
-      elif solution_get_input == "2":
-        for i in db.keys():
-          del db[i]
-        print("Database cleared. Press ENTER to restart.")
-        enter_to_continue()
-        exit(0)
-      elif solution_get_input == "3":
-        print(os.environ.get("REPLIT_DB_URL", "Invalid URL"))
-        enter_to_continue()
-        clear()
-      elif solution_get_input == "4":
-        print("type exit() to exit debug console")
-        try:
-          while True:
-            exec(input(">> "))
-        except Exception:
-          print("Exited debug console")
-          enter_to_continue()
-          clear()
-    else:
-      print('Invalid Option')
+      exit(0)
+    elif solution_get_input == 2:
+      print(os.environ.get("REPLIT_DB_URL", "Invalid URL"))
       enter_to_continue()
-      clear()
-    #clear()
-  except Exception as e:
-    print("An exception occurred.")
-    # Save state here.
-    raise e
+    elif solution_get_input == 3:
+      print("type 'exit()' to exit debug console")
+      try:
+        while True:
+          exec(input(">> "))
+      except:
+        print("Exited debug console")
+        enter_to_continue()
+  else:
+    print(f"{Foreground.RED}Invalid Option{Foreground.RESET}")
+    enter_to_continue()
