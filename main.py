@@ -374,7 +374,6 @@ def battle(active_pokemon_index):
               enemy_stats['enemy_pokemon_paralyze'] = True
               print(f'{active_pokemon} was paralyzed by {colored(enemy_pokemon, rarity, attrs=["blink"])}\'s {list(enemy_stats["special_ability"].keys())[0]}!')
             sleep(2)
-      break
 
   return
 
