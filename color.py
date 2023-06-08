@@ -23,6 +23,7 @@ class RGB:
   def __str__(self) -> str:
     return f"\033[38;2;{self.red};{self.green};{self.blue}" if self.isForeground else f"\033[48;2;{self.red};{self.green};{self.blue}m"
 
+
 class Foreground:
   """`Foreground` has 8 class variables: `BLACK`, `RED`, `GREEN`, `YELLOW`, `BLUE`, `MAGENTA`, `CYAN`, and `RESET`. They are assigned to their respective ANSI color codes. To use these color codes, simply concatenate them with a string like so:
 
@@ -38,6 +39,7 @@ print(f"{Color.Foreground.RED}This text is red.{Color.Foreground.RESET}")
   MAGENTA = "\033[35m"
   CYAN = "\033[36m"
   RESET = "\033[39m"
+
 
 class Background:
   """`Background` has 9 class variables: `BLACK`, `RED`, `GREEN`, `YELLOW`, `BLUE`, `MAGENTA`, `CYAN`, and `RESET`. They are assigned to their respective ANSI color codes. To use these color codes, simply concatenate them with a string like so:

@@ -1,16 +1,17 @@
 # Pokemon adventures
 
+PLEASE USE GIT (found in the tools tab) FROM NOW ON
+
 ## To-Do List
 
 ### Note:
 Only Idkwhttph has permission to delete tasks on To-Do list once its completed. If you think that a task on the To-Do list is not needed, you may ask Idkwhttph in chat.
 
-# PLEASE USE GIT (found in the tools tab) FROM NOW ON
 
 ### Battle Function
 - [x] choose pokemon (!!!)
 - [x] given a set of options (eg. battle, quit battle, potions, etc.)
-- [x] get battle working ~~(90%, needs to fix some errors.)~~ Yup i did it, but we need to remove health potions during battle.
+- [x] get battle working
 - [ ] Remove health potions during battle and move to outside
 - [50%] get pokemon working (pokemon view?) just need to show others
 - [ ] get pokedex working 
@@ -39,7 +40,6 @@ Only Idkwhttph has permission to delete tasks on To-Do list once its completed. 
 - [ ] When catching pokemon, give it like a few seconds to 'search' for the pokemon, then it will say 'a wild insert pokemon name here has appeared'. enter to continue and clear. Then choose the pokemon that u will battle against that pokemon.
 - [x] EVERYONE PLEASE GO TO LINE 30-50 and and see the important notes, Idkwhttph.
 - [x] redo the beginning of the game where you can use arrow keys to scroll down (finished by Idkwhttph) SIDE NOTE: DO NOT ADD IT ANYWHERE ELSE!
-
 - [ ] Do the functions ( unpack_data and save ) Format the code into different sections, if we keep going at this rate, its gonna be super messy.
 ## Rules
 - At least contribute 15 lines of code that MUST be fully functional AND works with the game. So it can't be print hello world 15 times
@@ -51,7 +51,6 @@ Only Idkwhttph has permission to delete tasks on To-Do list once its completed. 
 - **No racist comments** or cry because this is not the place to say these comments. Keep it to yourself and only yourself.
 
 If you fail to comply to these rules/requirements, You will be kicked out and blacklisted.
-
 
 ## Kicked/Banned users
 - kicked SnakeyKing (reason: Literally harassing me on ask)

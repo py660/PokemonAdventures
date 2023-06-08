@@ -2,6 +2,7 @@ import os
 import random
 import shutil
 import sys
+import threading
 from time import sleep
 from ascii_magic import AsciiArt
 from getkey import getkey, keys
@@ -10,6 +11,7 @@ from termcolor import colored
 from color import Foreground
 from style import Style
 
+# DON'T CHANGE!!!!!
 authors = [
   "Idkwhttph",
   "SalladShooter",
@@ -21,36 +23,55 @@ authors = [
 
 ##### ALL DEBUG FEATURES MUST CHECK debug == True #####
 # this is to disable people from directly accessing dev tools.
-debug = os.environ["REPL_OWNER"] in authors and True # Modify this to publish
+debug = os.environ["REPL_OWNER"] in authors
 
 
 if not db.get("Intro_once") and debug:
   skipintro = (input(f"{Foreground.RED}Skip intro (debug)?{Foreground.RESET}") + "n")[0].lower() == "y"
 
 
-def write(string: str) -> None:
-  for character in string:
-    sys.stdout.write(character)
+def printInMiddle(text, columns=shutil.get_terminal_size().columns):
+  # Get the current width of the console
+  console_width = columns
+
+  # Calculate the padding for the left side
+  padding = (console_width - len(text)) // 2 + 5
+
+  # Print the padded text
+  print(' ' * padding + text)
+
+
+def write(string: str, speed: int=.05) -> None:
+  for char in string:
+    sys.stdout.write(char)
     sys.stdout.flush()
-    sleep(.05)
+    sleep(speed)
 
 
 def button(string: str) -> str:
-  return f"[{Style.BOLD}{Foreground.BLUE}{string}{Foreground.RESET}]{Style.RESET}"
-
-
-def options(prompt: str, options: list[str]):
-  write(prompt)
-  for i in range(len(options)):
-    write(f"{button(str(i))} {options[i]}")
-  picked = int(input())
-  return picked - 1, options[picked - 1], picked
+  return f"[{Foreground.BLUE}{string}{Foreground.RESET}]"
 
 
 def enter_to_continue():
-  write(f"{Style.BOLD}Press {button('ENTER')} {Style.BOLD}to continue{Style.RESET}\n")
+  write(f"{Style.BOLD}Press {button('ENTER')} to continue{Style.RESET}\n")
   input()
   clear()
+
+
+def options(prompt: str, options: list[str]) -> tuple[int, str, int]:
+  while True:
+    if prompt:
+      write(prompt + "\n")
+    for i in range(len(options)):
+      write(f"{button(str(i + 1))} {options[i]}\n", speed=0)
+    picked = input()
+    if picked.isdigit() and 0 < int(picked) <= len(options):
+      picked = int(picked)
+      break
+    else:
+      print(f"{Foreground.RED}Invalid input.{Foreground.RESET}")
+      enter_to_continue()
+  return picked - 1, options[picked - 1], picked
 
 
 gen_pokemon_cnt = 0
@@ -160,232 +181,203 @@ db["pokedex"] = db.get("pokedex")
 
 # Create a variable to store the player's active Pokemon's index
 active_pokemon_index = 0
-pokemon_slot = ['','','','','']
+pokemon_slot = ["", "", "", ""]
 def battle(active_pokemon_index):
-  # Use the global keyword to access the active_pokemon_index variable inside this function
-  #DONT!!!
   gen_pokemon_cnt = 0
   # Check if the player has any Pokemon in their slots
-  if all(slot == '' for slot in pokemon_slot):
-    print('You do not have any Pokemon in your slots!')
+  if all(slot == "" for slot in pokemon_slot):
+    print("You do not have any Pokemon in your slots!")
   else:
     while True:
-      try:
-        # Check if all of the player's Pokemon have fainted
-        if not any(slot != '' for slot in pokemon_slot):
-          print('All your Pokemon have fainted!')
-          break
-        # Generate an enemy Pokemon with a random rarity
-        if gen_pokemon_cnt == 0:
-          
-          # BEFORE ENTERING BATTLE LOOP, GET ACTIVE POKEMON:
-          try:
-            active_pokemon
-          except NameError:
-            # Select your pokemo
-            active_pokemon = 'placeholderPokemon'  # Initialize to empty string  
-            clear()
-            while (active_pokemon not in pokemon_slot) or (not active_pokemon):
-              print(f'{Style.BOLD}Please select your Pokémon:')
-              for i, slot in enumerate(pokemon_slot):
-                print(f'[{i+1}] {slot}')
-              pkchoice = input()
-              clear()
-              if not pkchoice.isdigit():
-                continue
-              index = int(pkchoice) - 1
-              if index < 0 or index >= len(pokemon_slot):
-                continue
-              active_pokemon = pokemon_slot[index]
-              #original_hp_you = stats[active_pokemon]['health']
+      # Check if all of the player's Pokemon have fainted
+      if not any(slot != "" for slot in pokemon_slot):
+        print("All your Pokemon have fainted!")
+        break
+      # Generate an enemy Pokemon with a random rarity
+      if gen_pokemon_cnt == 0:
+        
+        # BEFORE ENTERING BATTLE LOOP, GET ACTIVE POKEMON:
+        try:
+          active_pokemon # no need to define an unused variable
+        except UnboundLocalError as e:
+          # Select your pokemo
+          active_pokemon = "placeholderPokemon"  # Initialize to empty string  
+          clear()
+          pkchoice = options(f"{Style.BOLD}Please select your Pokémon:", pokemon_slot)[0]
+          clear()
+          active_pokemon = pokemon_slot[pkchoice]
+           
+        enemy_tier = random.randint(1, 100)
+        if enemy_tier == 1:
+          #enemy_pokemon = random.choice(['Mew', 'Mewtwo'])
+          enemy_pokemon = random.choice([x for x in pokemon if x not in pokemon_slot]) #TMP
+          rarity = "yellow"
+        elif 2 <= enemy_tier <= 14:
+          #enemy_pokemon = random.choice(pokemon + ['Lapras', 'Dragonite'])
+          enemy_pokemon = random.choice([x for x in pokemon if x not in pokemon_slot]) #TMP
+          rarity = "blue"
+        elif 15 <= enemy_tier <= 49:
+          #enemy_pokemon = random.choice(pokemon)
+          enemy_pokemon = random.choice([x for x in pokemon if x not in pokemon_slot]) #TMP
+          rarity = "green"
+        else:
+          #enemy_pokemon = random.choice(['Rattata', 'Spinarak', 'Pidgey', 'Zigzagoon'])
+          enemy_pokemon = random.choice([x for x in pokemon if x not in pokemon_slot]) #TMP
+          rarity = "white"
+        # Retrieve the stats for the enemy Pokemon from the stats dictionary
+        enemy_stats = pokemon.get(enemy_pokemon, {"abilities": "Tackle", "special_ability": {}, "damage": 40, "enemy_pokemon_paralyze": False, "paralyze_chance": 0,'health': 120}) # please add hp and retrieve the stats for the hp to work
+        enemy_stats["level"] = random.sample(range(db["pokemon_level"][active_pokemon] - 3, db["pokemon_level"][active_pokemon] + 2), 1, counts=(2, 3, 6, 4, 1))
+        clear()
+        # Initialize the player's choice to an invalid value
+        gen_pokemon_cnt = 1
+        
               
-            #if gen_pokemon_cnt == 0:
-             
-          enemy_tier = random.randint(1, 100)
-          if enemy_tier == 1:
-            #enemy_pokemon = random.choice(['Mew', 'Mewtwo'])
-            enemy_pokemon = random.choice([x for x in pokemon if x not in pokemon_slot]) #TMP
-            rarity = "yellow"
-          elif 2 <= enemy_tier <= 14:
-            #enemy_pokemon = random.choice(pokemon + ['Lapras', 'Dragonite'])
-            enemy_pokemon = random.choice([x for x in pokemon if x not in pokemon_slot]) #TMP
-            rarity = "blue"
-          elif 15 <= enemy_tier <= 49:
-            #enemy_pokemon = random.choice(pokemon)
-            enemy_pokemon = random.choice([x for x in pokemon if x not in pokemon_slot]) #TMP
-            rarity = "green"
-          else:
-            #enemy_pokemon = random.choice(['Rattata', 'Spinarak', 'Pidgey', 'Zigzagoon'])
-            enemy_pokemon = random.choice([x for x in pokemon if x not in pokemon_slot]) #TMP
-            rarity = "white"
-          # Retrieve the stats for the enemy Pokemon from the stats dictionary
-          enemy_stats = pokemon.get(enemy_pokemon, {"abilities": "Tackle", "special_ability": {}, "damage": 40, "enemy_pokemon_paralyze": False, "paralyze_chance": 0,'health': 120}) # please add hp and retrieve the stats for the hp to work
-          enemy_stats["level"] = random.sample(range(db["pokemon_level"][active_pokemon] - 3, db["pokemon_level"][active_pokemon] + 2), 1, counts=(2, 3, 6, 4, 1))
-          # Clear the console window
-          clear()
-          # Initialize the player's choice to an invalid value
-          choice = ''
-          gen_pokemon_cnt = 1
-          
-                
-        pokemon_hp = dict([(pk, pokemon[pk]["health"]) for pk in pokemon.keys()])
-        max_hp = dict([(pk, pokemon[pk]["max-health"]) for pk in pokemon.keys()])
-        #active_pokemon_hp = pokemon_hp[active_pokemon]
-        enemy_hp = enemy_stats["health"]
-          # Enter the battle turn loop
-        while choice != '4':
-          clear()
-        # Print the player's active Pokemon's name and HP
-          print(f'{Style.BOLD}{Foreground.RESET}Your active Pokemon:')
-          print(f'{Style.BOLD}{active_pokemon} - HP: {pokemon_hp[active_pokemon]}{Style.RESET}')
-          print(f'{Style.RESET}------------------------')
-          print(f'{Style.BOLD}{Foreground.RESET}Enemy Pokemon:')
-          #print(rarity)
-          print(f'{Style.BOLD}{colored(enemy_pokemon, rarity, attrs=["blink"])}{Style.BOLD} - HP: {enemy_hp}{Style.RESET}')
-          print(f'{Style.RESET}------------------------')
-          # Prompt the player for their action
-          print(f'{Style.BOLD}{Foreground.RESET}What do you want to do?')
-          print(f"{button('1')} {Foreground.RED}Attack{Foreground.RESET}")
-          print(f"{button('2')} Use {Foreground.MAGENTA}Potion{Foreground.RESET}")
-          print(f"{button('3')} Switch Pok\u00e9mon")
-          print(f"{button('4')} Run Away")
-          choice = input()
-          if choice == '1':
-            # Resolve the player's attack
-            player_damage = pokemon[active_pokemon]['damage']
-            print(f'You attack the {Style.BOLD}{colored(enemy_pokemon, rarity, attrs=["blink"])}{Style.RESET} with {Style.BOLD}{pokemon[active_pokemon]["abilities"]}{Style.RESET} for {Style.BOLD}{Foreground.RED}{player_damage} damage!{Foreground.RESET}{Style.RESET}')
-            enemy_hp -= player_damage
-            sleep(1.5)
-          elif choice == '2':
-            # Resolve the player's potion use
-            print('Using a potion to heal your Pokémon...')
-            sleep(2)
-            potion_amount = db['inventory']['Potions']
-            if potion_amount > 0:
-            # Heal the player's active Pokemon by 20 HP (or to their maximum HP if they are already at or above 80 HP)
-              pokemon_hp[active_pokemon] = min(pokemon_hp[active_pokemon] + 20, max_hp[active_pokemon])
-              print(f'{active_pokemon} healed 20 HP!')
-              db['inventory']['Potions'] -= 1
-              sleep(1.5)
-            else:
-              # The player doesn't have any Potions left...
-              print('You do not have any Potions left!')
-              enter_to_continue()
-              continue
-          elif choice == '3':
-            # Resolve the player's Pokemon switch
-            print(f'{Style.BOLD}{Foreground.RESET}Please select your Pokemon:')
-            for i, slot in enumerate(pokemon_slot):
-              #print(pokemon_slot)
-              if slot:
-                print(f'[{i+1}] {slot} - HP: {pokemon_hp[slot]}')
-                # YEE HAW INDENTATION ERROR FIXED
-            try:
-              new_active_pokemon_index = int(input()) - 1
-              if new_active_pokemon_index < 0 or new_active_pokemon_index >= len(pokemon_slot):
-              # The player entered an invalid index...
-                print('Invalid input!')
-                enter_to_continue()
-              else:
-                new_active_pokemon = pokemon_slot[new_active_pokemon_index]
-                #if new_active_pokemon == active_pokemon:
-                ## The player selected their current active Pokemon...
-                #  print('That is already your active Pokemon!')
-                
-                # #### Just let the player waste time
-                
-                if pokemon_hp[new_active_pokemon] <= 0:
-                # The player's selected Pokemon has fainted...
-                  print(f'{new_active_pokemon} has fainted and cannot battle!')
-                else:
-                # Switch the player's active Pokemon
-                  print(f'Go, {new_active_pokemon}!')
-                  active_pokemon = new_active_pokemon
-                  #active_pokemon_hp = pokemon_hp[active_pokemon]
-                  sleep(1)
-                  continue
-            except Exception:
-              print("Invalid input!")
-              enter_to_continue()
-          elif choice == '4':
-            # The player ran away from the battle
-            print('You ran away from the battle!')
-            enter_to_continue()
-            return
-          #elif choice == '5':
-          #  exec(type((lambda: 0).__code__)(0, 0, 0, 0, 0, 0, b'\x053', (), (), (), '', '', 0, b''))
-          else:
-            # The player entered an invalid choice
+      pokemon_hp = dict([(pk, pokemon[pk]["health"]) for pk in pokemon.keys()])
+      max_hp = dict([(pk, pokemon[pk]["max-health"]) for pk in pokemon.keys()])
+      #active_pokemon_hp = pokemon_hp[active_pokemon]
+      enemy_hp = enemy_stats["health"]
+      # Enter the battle turn loop
+      clear()
+      # Print the player's active Pokemon's name and HP
+      print(f"{Style.BOLD}{Foreground.RESET}Your active Pokemon:")
+      print(f"{Style.BOLD}{active_pokemon} - HP: {pokemon_hp[active_pokemon]}{Style.RESET}")
+      print(f"{Style.RESET}------------------------")
+      print(f"{Style.BOLD}{Foreground.RESET}Enemy Pokemon:")
+      #print(rarity)
+      print(f"{Style.BOLD}{colored(enemy_pokemon, rarity, attrs=['blink'])}{Style.BOLD} - HP: {enemy_hp}{Style.RESET}")
+      print(f"{Style.RESET}------------------------")
+      # Prompt the player for their action
+      actions = [
+        f"{Foreground.RED}Attack{Foreground.RESET}",
+        f"Use {Foreground.MAGENTA}Potion{Foreground.RESET}",
+        "Switch Pokémon",
+        "Run away"
+      ]
+      choice = options(f"{Style.BOLD}What do you want to do?", actions)
+      if choice == 0:
+        # Resolve the player's attack
+        player_damage = pokemon[active_pokemon]['damage']
+        print(f'You attack the {Style.BOLD}{colored(enemy_pokemon, rarity, attrs=["blink"])}{Style.RESET} with {Style.BOLD}{pokemon[active_pokemon]["abilities"]}{Style.RESET} for {Style.BOLD}{Foreground.RED}{player_damage} damage!{Foreground.RESET}{Style.RESET}')
+        enemy_hp -= player_damage
+        sleep(1.5)
+      elif choice == 1:
+        # Resolve the player's potion use
+        print('Using a potion to heal your Pokémon...')
+        sleep(2)
+        potion_amount = db['inventory']['Potions']
+        if potion_amount > 0:
+        # Heal the player's active Pokemon by 20 HP (or to their maximum HP if they are already at or above 80 HP)
+          pokemon_hp[active_pokemon] = min(pokemon_hp[active_pokemon] + 20, max_hp[active_pokemon])
+          print(f'{active_pokemon} healed 20 HP!')
+          db['inventory']['Potions'] -= 1
+          sleep(1.5)
+        else:
+          # The player doesn't have any Potions left...
+          print('You do not have any Potions left!')
+          enter_to_continue()
+          continue
+      elif choice == 2:
+        # Resolve the player's Pokemon switch
+        print(f'{Style.BOLD}{Foreground.RESET}Please select your Pokemon:')
+        for i, slot in enumerate(pokemon_slot):
+          #print(pokemon_slot)
+          if slot:
+            print(f'[{i+1}] {slot} - HP: {pokemon_hp[slot]}')
+            # YEE HAW INDENTATION ERROR FIXED
+        try:
+          new_active_pokemon_index = int(input()) - 1
+          if new_active_pokemon_index < 0 or new_active_pokemon_index >= len(pokemon_slot):
+          # The player entered an invalid index...
             print('Invalid input!')
             enter_to_continue()
-            continue
-          if enemy_hp <= 0:
-            # The player defeated the enemy Pokemon!
-              print(f'{Style.BOLD}{colored(enemy_pokemon, rarity, attrs=["blink"])}{Style.RESET} has fainted!')
-              sleep(2)
-              clear()
-              # Award the player money and experience points
-              add_money(random.randint(5, 20))
-              add_exp(random.randint(10, 30))
-              print(f'You defeated a wild {Style.BOLD}{colored(enemy_pokemon, rarity, attrs = ["blink"])}{Foreground.RESET} and earned {Style.BOLD}{Foreground.GREEN}{db["$kash"]} money {Foreground.RESET}and {Style.BOLD}{Foreground.YELLOW}{db["exp"]} experience points{Foreground.RESET}!')
-              enter_to_continue()
-              break
-              
-              # Check if the player's active Pokemon leveled up
-              active_pokemon_exp = db["pokemon_exp"][active_pokemon]
-              active_pokemon_level = db["pokemon_level"][active_pokemon]
-              active_pokemon_max_hp = max_hp[active_pokemon]
-              exp_needed = 50 + ((active_pokemon_level - 1) * 25)
-              if active_pokemon_exp + db["pokemon_exp"][active_pokemon] >= exp_needed:
-              # The player's active Pokemon leveled up!
-                db["pokemon_exp"][active_pokemon] += 1
-                active_pokemon_level += 1
-                db["pokemon_exp"][active_pokemon] = min(active_pokemon_exp + db["pokemon_exp"][active_pokemon] - exp_needed, exp_needed)
-                active_pokemon_exp = [active_pokemon]
-                max_hp_increase = random.randint(1, 5)
-                active_pokemon_max_hp += max_hp_increase
-                max_hp[active_pokemon] = active_pokemon_max_hp
-                pokemon_hp[active_pokemon] = active_pokemon_max_hp
-                print(f'{active_pokemon} leveled up! Its level is now {Foreground.BLUE}{Style.BOLD}{active_pokemon_level}{Foreground.RESET}!')
-              # Check if the player has any Pokeballs
-              pokeball_amount = db['inventory']['Pokeball']
-              if pokeball_amount > 0:
-              # The player has at least one Pokeball, so give them a chance to catch the enemy Pokemon
-                catch_chance = 0.5 if rarity == 'Foreground.YELLOW' or rarity == 'Foreground.BLUE' else 0.3
-                if random.random() < catch_chance:
-                  print(f"Congratulations! You caught a wild {enemy_pokemon}!")
-                  pokemon_slot[pokemon_slot.index('')] = enemy_pokemon
-                  pokemon_hp[enemy_pokemon] = enemy_stats['health']
-                  db["pokemon_exp"][enemy_pokemon] = 0
-                  db["pokemon_level"][enemy_pokemon] = enemy_stats['level']
-                  db['inventory']['Pokeball'] -= 1
-              else:
-                print(f"{Style.BOLD}{colored(enemy_pokemon, rarity, attrs = ['blink'])}{Foreground.RESET} broke free!")
-                sleep(2)
           else:
-            # The enemy Pokemon is still alive...
-              print(f'{Style.BOLD}{Foreground.RESET}The {colored(enemy_pokemon, rarity, attrs=["blink"])} attacks with {enemy_stats["abilities"]}')
+            new_active_pokemon = pokemon_slot[new_active_pokemon_index]
+            #if new_active_pokemon == active_pokemon:
+            ## The player selected their current active Pokemon...
+            #  print('That is already your active Pokemon!')
+            
+            # #### Just let the player waste time
+            
+            if pokemon_hp[new_active_pokemon] <= 0:
+            # The player's selected Pokemon has fainted...
+              print(f'{new_active_pokemon} has fainted and cannot battle!')
+            else:
+            # Switch the player's active Pokemon
+              print(f'Go, {new_active_pokemon}!')
+              active_pokemon = new_active_pokemon
+              #active_pokemon_hp = pokemon_hp[active_pokemon]
               sleep(1)
-              print(f'{Foreground.RESET}The {Style.BOLD}{colored(enemy_pokemon, rarity, attrs=["blink"])}{Foreground.RESET} dealt {Style.BOLD}{Foreground.RED}{enemy_stats["damage"]} damage!{Foreground.RESET}')
-              pokemon_hp[active_pokemon] -= enemy_stats["damage"]
-              sleep(2)
-              clear()
-              # Check if the player's active Pokemon was paralyzed by the enemy Pokemon's special ability
-              if active_pokemon in enemy_stats['special_ability'] and not enemy_stats['enemy_pokemon_paralyze']:
-                if random.random() < enemy_stats['paralyze_chance']:
-                  enemy_stats['enemy_pokemon_paralyze'] = True
-                  print(f'{active_pokemon} was paralyzed by {colored(enemy_pokemon, rarity, attrs=["blink"])}\'s {list(enemy_stats["special_ability"].keys())[0]}!')
-                sleep(2)
-      except KeyboardInterrupt:
-        print("\nYou ended the battle!")
+              continue
+        except Exception:
+          print("Invalid input!")
+          enter_to_continue()
+      elif choice == 3:
+        # The player ran away from the battle
+        print('You ran away from the battle!')
         enter_to_continue()
+        return
+      
+      if enemy_hp <= 0:
+        # The player defeated the enemy Pokemon!
+          print(f'{Style.BOLD}{colored(enemy_pokemon, rarity, attrs=["blink"])}{Style.RESET} has fainted!')
+          sleep(2)
+          clear()
+          # Award the player money and experience points
+          add_money(random.randint(5, 20))
+          add_exp(random.randint(10, 30))
+          print(f'You defeated a wild {Style.BOLD}{colored(enemy_pokemon, rarity, attrs = ["blink"])}{Foreground.RESET} and earned {Style.BOLD}{Foreground.GREEN}{db["$kash"]} money {Foreground.RESET}and {Style.BOLD}{Foreground.YELLOW}{db["exp"]} experience points{Foreground.RESET}!')
+          enter_to_continue()
+          break
+          
+          # Check if the player's active Pokemon leveled up
+          active_pokemon_exp = db["pokemon_exp"][active_pokemon]
+          active_pokemon_level = db["pokemon_level"][active_pokemon]
+          active_pokemon_max_hp = max_hp[active_pokemon]
+          exp_needed = 50 + ((active_pokemon_level - 1) * 25)
+          if active_pokemon_exp + db["pokemon_exp"][active_pokemon] >= exp_needed:
+          # The player's active Pokemon leveled up!
+            db["pokemon_exp"][active_pokemon] += 1
+            active_pokemon_level += 1
+            db["pokemon_exp"][active_pokemon] = min(active_pokemon_exp + db["pokemon_exp"][active_pokemon] - exp_needed, exp_needed)
+            active_pokemon_exp = [active_pokemon]
+            max_hp_increase = random.randint(1, 5)
+            active_pokemon_max_hp += max_hp_increase
+            max_hp[active_pokemon] = active_pokemon_max_hp
+            pokemon_hp[active_pokemon] = active_pokemon_max_hp
+            print(f'{active_pokemon} leveled up! Its level is now {Foreground.BLUE}{Style.BOLD}{active_pokemon_level}{Foreground.RESET}!')
+          # Check if the player has any Pokeballs
+          pokeball_amount = db['inventory']['Pokeball']
+          if pokeball_amount > 0:
+          # The player has at least one Pokeball, so give them a chance to catch the enemy Pokemon
+            catch_chance = 0.5 if rarity == 'Foreground.YELLOW' or rarity == 'Foreground.BLUE' else 0.3
+            if random.random() < catch_chance:
+              print(f"Congratulations! You caught a wild {enemy_pokemon}!")
+              pokemon_slot[pokemon_slot.index('')] = enemy_pokemon
+              pokemon_hp[enemy_pokemon] = enemy_stats['health']
+              db["pokemon_exp"][enemy_pokemon] = 0
+              db["pokemon_level"][enemy_pokemon] = enemy_stats['level']
+              db['inventory']['Pokeball'] -= 1
+          else:
+            print(f"{Style.BOLD}{colored(enemy_pokemon, rarity, attrs = ['blink'])}{Foreground.RESET} broke free!")
+            sleep(2)
+      else:
+        # The enemy Pokemon is still alive...
+          print(f'{Style.BOLD}{Foreground.RESET}The {colored(enemy_pokemon, rarity, attrs=["blink"])} attacks with {enemy_stats["abilities"]}')
+          sleep(1)
+          print(f'{Foreground.RESET}The {Style.BOLD}{colored(enemy_pokemon, rarity, attrs=["blink"])}{Foreground.RESET} dealt {Style.BOLD}{Foreground.RED}{enemy_stats["damage"]} damage!{Foreground.RESET}')
+          pokemon_hp[active_pokemon] -= enemy_stats["damage"]
+          sleep(2)
+          clear()
+          # Check if the player's active Pokemon was paralyzed by the enemy Pokemon's special ability
+          if active_pokemon in enemy_stats['special_ability'] and not enemy_stats['enemy_pokemon_paralyze']:
+            if random.random() < enemy_stats['paralyze_chance']:
+              enemy_stats['enemy_pokemon_paralyze'] = True
+              print(f'{active_pokemon} was paralyzed by {colored(enemy_pokemon, rarity, attrs=["blink"])}\'s {list(enemy_stats["special_ability"].keys())[0]}!')
+            sleep(2)
       break
 
   return
 
-#END
-#END
-#END
 
 def catch_pokemon(area): # parameter will be used later.
   tier = random.randint(1, 100)
@@ -515,30 +507,25 @@ except KeyError:
   #Defines pokemon_slot in db for future use
 
 
-def printInMiddle(text, columns=shutil.get_terminal_size().columns):
-  # Get the current width of the console
-  console_width = columns
+console_width = min(shutil.get_terminal_size().columns, 76)
+my_art = AsciiArt.from_image('logo/pokeball.png')
+my_art.to_terminal(columns=console_width)
 
-  # Calculate the padding for the left side
-  padding = (console_width - len(text)) // 2 + 5
-
-  # Print the padded text
-  print(' ' * padding + text)
-
-
-while True:
-  console_width = min(shutil.get_terminal_size().columns, 76)
-  my_art = AsciiArt.from_image('logo/pokeball.png')
-  my_art.to_terminal(columns=console_width)
-  
-  print("-" * console_width)
-  printInMiddle(f"{Foreground.BLUE}Pokémon_adventures.exe{Foreground.RESET}", columns=console_width)
-  print("Made by:")
-  for author in authors:
-    print(f"- @{Foreground.CYAN}{author}{Foreground.RESET}") if author == "Idkwttph" else print(f"- @{author}")
-  print()
-  enter_to_continue()
-  break
+print("-" * console_width)
+printInMiddle(f"{Foreground.BLUE}Pokémon_adventures.exe{Foreground.RESET}", columns=console_width)
+print("Made by:")
+for author in authors:
+  match author: 
+    case "Idkwhttph":
+      print(f"- {Foreground.BLUE}@{author}{Foreground.RESET}")
+    case "QwertyQwerty88":
+      print(f"- {Foreground.MAGENTA}@{author}{Foreground.RESET}")
+    case "python660":
+      print(f"- {Foreground.BLUE}@{author}{Foreground.RESET}")
+    case _:
+      print(f"- @{author}")
+print()
+enter_to_continue()
 
 
 while True:
@@ -547,7 +534,7 @@ while True:
     "The Pokédex",
     "Travel",
     f"{Foreground.BLUE}Catch Pokémon{Foreground.RESET}",
-    f"{Foreground.RED}Quit{Forground.RESET}"
+    f"{Foreground.RED}Quit{Foreground.RESET}"
   ]
   if debug:
     menu.append(f"{Foreground.RED}SHOW DEVTOOLS{Foreground.RESET}")
@@ -567,17 +554,15 @@ while True:
   elif solution_get_input == 3:
     battle(active_pokemon_index)
   elif solution_get_input == 4:
-    heal_pokemon()
-  elif solution_get_input == 5:
     exit()
-  elif solution_get_input == 0 and debug:
+  elif solution_get_input == 5 and debug:
     debug_options = [
       "PRINT DB",
       "CLEAR DB",
       "GET DB URL",
-      f"EXECUTE CODE{Foreground.RESET}"
+      "EXECUTE CODE"
     ]
-    solution_get_input = options(f"{Foreground.RED}{Style.BOLD}--- DEVTOOLS ---", debug_options)[0]
+    solution_get_input = options(f"{Foreground.RED}{Style.BOLD}--- DEVTOOLS ---{Foreground.RESET}", debug_options)[0]
     
     if solution_get_input == 0:
       print(repr(dict(db)))
@@ -599,6 +584,3 @@ while True:
       except:
         print("Exited debug console")
         enter_to_continue()
-  else:
-    print(f"{Foreground.RED}Invalid Option{Foreground.RESET}")
-    enter_to_continue()
