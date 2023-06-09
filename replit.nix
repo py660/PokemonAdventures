@@ -1,5 +1,6 @@
 { pkgs }: {
   deps = [
+		pkgs.nodePackages.prettier
     pkgs.unzip
     pkgs.wget
     pkgs.python39Packages.poetry
